@@ -1,10 +1,14 @@
 <template>
   <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Arvo&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Carter+One&display=swap" rel="stylesheet">
 
   <div id="pokedex">
     <div :key="poke.id" v-for="poke in pokemon" class="card">
-      <h2 class="pokeName">{{ poke.name }}</h2>
+
+      <h2 v-if="poke.isMythical" class="pokeNameMythical" >{{ poke.name }} </h2>
+         
+      <h2 class="pokeName" v-else >{{ poke.name }} </h2>
       
       <div v-if="poke.isLegendary" class='legendary'>
         <p>Legendary</p>
@@ -13,7 +17,7 @@
       <div v-if="poke.isMythical" class='mythical'>
         <p>Mythical</p>
       </div>
-
+      <img src="../assets/pokeball.png" style="width: 55%; height: 40%;" class='pokeball' alt="">
       <img :src="poke.imgSrc" class="imgPoke">
       
       <div class="stats">
@@ -44,7 +48,7 @@ export default {
   },
   //* Function to get pokemon
   async created(){
-    for(let index = 1; index <= 151; index++) {
+    for(let index = 440; index <= 600; index++) {
       let response = await fetch(`https://pokeapi.co/api/v2/pokemon/${index}/`);
       let data = await response.json();
       console.log(data);
@@ -82,6 +86,60 @@ export default {
   padding: 0;
 }
 
+
+#pokedex {
+  width: 90%;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card {
+  width: 150px;
+  height: 200px;
+  margin: 2%;
+  border: 1px solid black;
+  position: relative;
+  display: grid;
+  place-items: center;
+  transition: 1s;
+  
+}
+
+.pokeNameMythical{
+  background: black;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  text-align: center;
+  text-transform: capitalize;
+  font-family: 'Carter One', cursive;
+  color: white;
+  transform: scale(1.01);
+}
+
+.imgPoke{
+  position:absolute;
+}
+
+.pokeball{
+  opacity: 0.7;
+}
+
+.pokeName {
+  width: 100%;
+  background: black;
+  color: white;
+  text-transform: capitalize;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  font-family: 'Carter One', cursive;
+  font-size: 20px;
+  padding: 2px;
+}
+
+
 .legendary{
   position: absolute;
   left: -5%;
@@ -100,6 +158,16 @@ export default {
   font-family: 'DotGothic16', sans-serif;
 }
 
+@keyframes mythicalAnimation {
+  0% { 
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1)
+  }
+
+}
+
 .mythical{
   position: absolute;
   left: -5%;
@@ -108,6 +176,7 @@ export default {
   display: flex;
   text-align: center;
   font-size: 10px;
+  animation: mythicalAnimation 600ms ease-in infinite alternate;
 }
 
 .mythical p{
@@ -118,41 +187,6 @@ export default {
   text-orientation: upright;
   font-family: 'DotGothic16', sans-serif;
 }
-
-#pokedex {
-  width: 90%;
-  margin: auto;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.card {
-  width: 150px;
-  height: 200px;
-  margin: 5%;
-  border: 1px solid black;
-  position: relative;
-  display: grid;
-  place-items: center;
-}
-
-.imgPoke{
-  position:absolute;
-}
-
-.pokeName{
-  width: 100%;
-  background: black;
-  color: white;
-  text-transform: capitalize;
-  text-align: center;
-  position: absolute;
-  top: 0;
-  font-family: 'Arvo', serif;
-  font-size: 20px;
-  padding: 2px;
-}
-
 .stats{
   position: absolute;
   top: 75%;
