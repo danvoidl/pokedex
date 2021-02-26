@@ -8,6 +8,11 @@
     rel="stylesheet"
   />
 
+  <link
+    href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+    rel="stylesheet"
+  />
+
   <div class="gen">
     <button class="btn-gen" @click="getPokemon(1, 151)">1ª Gen</button>
     <button class="btn-gen" @click="getPokemon(152, 251)">2ª Gen</button>
@@ -26,7 +31,9 @@
 
   <div id="pokedex">
     <div :key="poke.id" v-for="poke in pokemon" class="card">
-      <h2 class="pokeName">{{ poke.name }}</h2>
+      <div class="pokeName">
+        <h2>{{ poke.name }}</h2>
+      </div>
 
       <div v-if="poke.isLegendary" class="legendary">
         <p>Legendary</p>
@@ -36,7 +43,18 @@
         <p>Mythical</p>
       </div>
 
-      <img :src="poke.imgSrc" class="imgPoke" />
+      <img
+        src="../assets/pokeball.svg"
+        style="width: 60%; height: 50%; opacity: 60%"
+        alt=""
+      />
+      <img
+        :src="poke.imgSrc"
+        alt=""
+        v-if="poke.isMythical"
+        class="imgMythical"
+      />
+      <img :src="poke.imgSrc" class="imgPoke" :alt="poke.name" v-else />
 
       <div class="stats">
         <span :key="stat" v-for="stat in poke.stats">
@@ -69,93 +87,65 @@ export default {
   },
   //* Function to get pokemon
   methods: {
-    async getPokemon(begin, end) {
-      //! 1ª Gen: 1 - 151
-      //! 2ª Gen: 152 - 251
-      //! 3ª Gen: 252 - 386
-      //! 4ª Gen: 387 - 493
-      //! 5ª Gen: 494 - 649
-      //! 6ª Gen: 650 - 721
-      //! 7ª Gen: 722 - 809
-      //! 8ª Gen: 810 - 898
+    async getPokemon(begin , end ) {
+      //! | 1ª Gen  | 2ª Gen    | 3ª Gen    | 4ª Gen    | 5ª Gen    | 6ª Gen    | 7ª Gen    | 8ª Gen
+      //! | 1 - 151 | 152 - 251 | 252 - 386 | 387 - 493 | 494 - 649 | 650 - 721 | 722 - 809 | 810 - 898
 
       this.pokemon = [];
 
       for (let index = begin; index <= end; index++) {
-        let response = await fetch(
-          `https://pokeapi.co/api/v2/pokemon/${index}/`
-        );
-        let data = await response.json();
-        console.log(data);
+        let data = await fetch(`https://pokeapi.co/api/v2/pokemon/${index}/`);
+        var pokemonData = await data.json();
 
-        let response2 = await fetch(data.species.url);
-        let data2 = await response2.json();
+        let status = await fetch(pokemonData.species.url);
+        let pokemonStatus = await status.json();
 
-        console.log(data2);
-
-        this.pokemon.push({
-          name: data.name,
-          imgSrc: data.sprites.front_default,
-          types: data.types,
-          isLegendary: data2.is_legendary,
-          isMythical: data2.is_mythical,
-          stats: [
-            {
-              stat: data.stats[0].stat.name,
-              statValue: data.stats[0].base_stat,
-            },
-            {
-              stat: data.stats[1].stat.name,
-              statValue: data.stats[1].base_stat,
-            },
-          ],
-        });
+        this.feedArray(pokemonData, pokemonStatus);
       }
     },
     async getPokemonByName() {
       this.pokemon = [];
-
       let name = document.getElementById("searchpoke").value;
 
-      console.log(name);
       let response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}/`
       );
       let data = await response.json();
 
-      console.log(data);
-
       let response2 = await fetch(data.species.url);
       let data2 = await response2.json();
 
-      console.log(data2);
-
+      this.feedArray(data, data2);
+    },
+    feedArray(pokemon, pokemonStatus) {
       this.pokemon.push({
-        name: data.name,
-        imgSrc: data.sprites.front_default,
-        types: data.types,
-        isLegendary: data2.is_legendary,
-        isMythical: data2.is_mythical,
+        name: pokemon.name,
+        imgSrc: pokemon.sprites.front_default,
+        types: pokemon.types,
+        isLegendary: pokemonStatus.is_legendary,
+        isMythical: pokemonStatus.is_mythical,
         stats: [
           {
-            stat: data.stats[0].stat.name,
-            statValue: data.stats[0].base_stat,
+            stat: pokemon.stats[0].stat.name,
+            statValue: pokemon.stats[0].base_stat,
           },
           {
-            stat: data.stats[1].stat.name,
-            statValue: data.stats[1].base_stat,
+            stat: pokemon.stats[1].stat.name,
+            statValue: pokemon.stats[1].base_stat,
           },
         ],
       });
     },
   },
   async created() {
-    this.getPokemon(1, 3);
+    this.getPokemon(150, 151);
   },
 };
 </script>
 
 <style>
+@import url("stylesForTypes.css");
+
 * {
   margin: 0;
   padding: 0;
@@ -163,12 +153,16 @@ export default {
 
 /* STYLES FOR THE GENERATION OPTIONS */
 .gen {
-  
+  margin: auto;
+  margin-top: 2%;
+  width: 90%;
+  display: flex;
+  justify-content: space-around;
 }
 
 @media (min-width: 300px) and (max-width: 450px) {
   .gen {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     width: 90%;
   }
 
@@ -176,9 +170,14 @@ export default {
     margin: 1%;
   }
 
-  .card{
+  .card {
+    margin: 2% !important;
     margin-bottom: 4% !important;
-    background-color:#5c95fc
+  }
+
+  #pokedex {
+    width: 95% !important;
+    margin-top: 5% !important;
   }
 }
 
@@ -225,26 +224,40 @@ export default {
   height: 200px;
   margin: 2%;
   border: 1px solid black;
+  border-top: none;
   position: relative;
   display: grid;
   place-items: center;
+  backdrop-filter: blur(5px);
+  transition: 200ms;
+}
+
+.card:hover {
+  transform: scale(1.05);
 }
 
 .imgPoke {
   position: absolute;
 }
 
+a {
+  text-decoration: none;
+}
+
 .pokeName {
   width: 100%;
   background: black;
-  color: white;
-  text-transform: capitalize;
-  text-align: center;
   position: absolute;
   top: 0;
+}
+
+.pokeName h2 {
+  color: white;
+  padding: 3px;
+  text-transform: capitalize;
+  text-align: center;
   font-family: "Josefin Sans", sans-serif;
-  font-size: 20px;
-  padding: 2px;
+  font-size: 18px;
 }
 
 /* STYLES FOR STATUS */
@@ -267,6 +280,7 @@ export default {
 
 .stats span p {
   color: black;
+  font-family: "DotGothic16", sans-serif;
 }
 
 /* STYLES FOR TYPE */
@@ -323,86 +337,24 @@ export default {
   writing-mode: vertical-lr;
   text-orientation: upright;
   font-family: "DotGothic16", sans-serif;
+  animation: 1s linear 1s infinite alternate mityhcalanimation;
+}
+
+.imgMythical {
+  position: absolute;
+  animation: 1s linear 1s infinite alternate mityhcalanimation;
+}
+
+@keyframes mityhcalanimation {
+  from {
+    transform: scale(1);
+    color: ghostwhite;
+  }
+  to {
+    transform: scale(1.1);
+    color: gold;
+  }
 }
 
 /* STYLES FOR TYPES */
-.bug {
-  background: #afc421;
-  box-shadow: 3px 3px 3px #afc421;
-}
-
-.dark {
-  background: #6b5142;
-}
-
-.dragon {
-  background: #7a3dff;
-}
-
-.electric {
-  background: #f6d434;
-  font-size: 14px;
-}
-
-.fighting {
-  background: #c62922;
-  font-size: 14px;
-}
-
-.fire {
-  background: #e98049;
-}
-
-.flying {
-  background: #967ed2;
-}
-
-.ghost {
-  background: #644c8a;
-}
-
-.grass {
-  background: #7cc359;
-}
-
-.ground {
-  background: #debe5b;
-}
-
-.ice {
-  background: #9adbdd;
-}
-
-.normal {
-  background: #b6ba87;
-}
-
-.fairy {
-  background: #ff87ab;
-}
-
-.poison {
-  background: #a441ad;
-  box-shadow: 1px 1px 3px #6c2b72;
-}
-
-.psychic {
-  background: #ff417b;
-}
-
-.rock {
-  background: #b59e2e;
-}
-
-.steel {
-  background: #c1bfcd;
-}
-
-.water {
-  background: #5c95fc;
-}
-
-.shadow {
-  background: #7f6cbb;
-}
 </style>

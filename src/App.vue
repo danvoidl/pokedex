@@ -30,7 +30,13 @@ export default {
 }
 </script>
 
-<style>
+<style>    
+    html, body{
+        min-width: 350px;
+    }
+
+    
+
     .container-title{
         margin-top: 5%;
     }
@@ -65,15 +71,11 @@ export default {
             margin-top: 2%;
         }
     }
-    .gen{
-        margin-top: 2%;
-        width: 100%;
-        display: flex;
-        justify-content: space-around;
-    }
 
     .btn-gen{
         width: 80px;
         height: 40px;
     }
+
+    
 </style>
