@@ -14,18 +14,18 @@
   />
 
   <div class="gen">
-    <button class="btn-gen" @click="getPokemon(1, 151)">1ª Gen</button>
-    <button class="btn-gen" @click="getPokemon(152, 251)">2ª Gen</button>
-    <button class="btn-gen" @click="getPokemon(252, 386)">3ª Gen</button>
-    <button class="btn-gen" @click="getPokemon(387, 493)">4ª Gen</button>
-    <button class="btn-gen" @click="getPokemon(495, 649)">5ª Gen</button>
-    <button class="btn-gen" @click="getPokemon(650, 721)">6ª Gen</button>
-    <button class="btn-gen" @click="getPokemon(722, 809)">7ª Gen</button>
-    <button class="btn-gen" @click="getPokemon(810, 898)">8ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(1, 151)">1ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(152, 251)">2ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(252, 386)">3ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(387, 493)">4ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(495, 649)">5ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(650, 721)">6ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(722, 809)">7ª Gen</button>
+    <button class="btn-gen" @click="getGeneration(810, 898)">8ª Gen</button>
   </div>
 
   <span class="searchpokemon">
-    <input id="searchpoke" type="text" placeholder="Pokemon Name" />
+    <input class="searchpoke" type="text" placeholder="Pokemon Name" />
     <button class="search" @click="getPokemonByName()">Pesquisar</button>
   </span>
 
@@ -45,12 +45,10 @@
 
       <img
         src="../assets/pokeball.svg"
-        style="width: 60%; height: 50%; opacity: 60%"
-        alt=""
+        style="width: 60%; height: 50%; opacity: 60%"        
       />
       <img
-        :src="poke.imgSrc"
-        alt=""
+        :src="poke.imgSrc"        
         v-if="poke.isMythical"
         class="imgMythical"
       />
@@ -61,10 +59,9 @@
           <img
             v-if="stat.stat == 'hp'"
             style="width: 20px"
-            src="../assets/heart.svg"
-            alt=""
+            src="../assets/heart.svg"            
           />
-          <img v-else src="../assets/swords.svg" style="width: 20px" alt="" />
+          <img v-else src="../assets/swords.svg" style="width: 20px" />
           <p>{{ stat.statValue }}</p>
         </span>
       </div>
@@ -87,35 +84,21 @@ export default {
   },
   //* Function to get pokemon
   methods: {
-    async getPokemon(begin , end ) {
+    async getGeneration(begin, end) {
       //! | 1ª Gen  | 2ª Gen    | 3ª Gen    | 4ª Gen    | 5ª Gen    | 6ª Gen    | 7ª Gen    | 8ª Gen
       //! | 1 - 151 | 152 - 251 | 252 - 386 | 387 - 493 | 494 - 649 | 650 - 721 | 722 - 809 | 810 - 898
 
       this.pokemon = [];
 
       for (let index = begin; index <= end; index++) {
-        let data = await fetch(`https://pokeapi.co/api/v2/pokemon/${index}/`);
-        var pokemonData = await data.json();
-
-        let status = await fetch(pokemonData.species.url);
-        let pokemonStatus = await status.json();
-
-        this.feedArray(pokemonData, pokemonStatus);
+        await this.getPokemon(index)
       }
     },
     async getPokemonByName() {
       this.pokemon = [];
-      let name = document.getElementById("searchpoke").value;
+      let name = document.querySelector(".searchpoke").value;
 
-      let response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}/`
-      );
-      let data = await response.json();
-
-      let response2 = await fetch(data.species.url);
-      let data2 = await response2.json();
-
-      this.feedArray(data, data2);
+      await this.getPokemon(name)
     },
     feedArray(pokemon, pokemonStatus) {
       this.pokemon.push({
@@ -136,9 +119,18 @@ export default {
         ],
       });
     },
+    async getPokemon(index){
+      let data = await fetch(`https://pokeapi.co/api/v2/pokemon/${index}/`);
+      var pokemonData = await data.json();
+
+      let status = await fetch(pokemonData.species.url);
+      let pokemonStatus = await status.json();
+
+      this.feedArray(pokemonData, pokemonStatus);
+    }
   },
   async created() {
-    this.getPokemon(150, 151);
+    await this.getGeneration(150, 151);
   },
 };
 </script>
