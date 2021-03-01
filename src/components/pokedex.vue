@@ -32,8 +32,16 @@
   <div id="pokedex">
     <div :key="poke.id" v-for="poke in pokemon" class="card">
       <div class="pokeName">
-        <h2>{{ poke.name }}</h2>
+        <h2 :title="poke.name">
+          {{
+            poke.name.length > 10
+              ? `${poke.name.substring(0, 8)}...`
+              : poke.name
+          }}
+        </h2>
       </div>
+
+      <p class="pokeId">#{{ poke.id }}</p>
 
       <div v-if="poke.isLegendary" class="legendary">
         <p>Legendary</p>
@@ -45,13 +53,9 @@
 
       <img
         src="../assets/pokeball.svg"
-        style="width: 60%; height: 50%; opacity: 60%"        
+        style="width: 60%; height: 50%; opacity: 60%"
       />
-      <img
-        :src="poke.imgSrc"        
-        v-if="poke.isMythical"
-        class="imgMythical"
-      />
+      <img :src="poke.imgSrc" v-if="poke.isMythical" class="imgMythical" />
       <img :src="poke.imgSrc" class="imgPoke" :alt="poke.name" v-else />
 
       <div class="stats">
@@ -59,7 +63,7 @@
           <img
             v-if="stat.stat == 'hp'"
             style="width: 20px"
-            src="../assets/heart.svg"            
+            src="../assets/heart.svg"
           />
           <img v-else src="../assets/swords.svg" style="width: 20px" />
           <p>{{ stat.statValue }}</p>
@@ -91,17 +95,18 @@ export default {
       this.pokemon = [];
 
       for (let index = begin; index <= end; index++) {
-        await this.getPokemon(index)
+        await this.getPokemon(index);
       }
     },
     async getPokemonByName() {
       this.pokemon = [];
       let name = document.querySelector(".searchpoke").value;
 
-      await this.getPokemon(name)
+      await this.getPokemon(name.toLowerCase());
     },
     feedArray(pokemon, pokemonStatus) {
       this.pokemon.push({
+        id: pokemon.id,
         name: pokemon.name,
         imgSrc: pokemon.sprites.front_default,
         types: pokemon.types,
@@ -119,15 +124,20 @@ export default {
         ],
       });
     },
-    async getPokemon(index){
+    async getPokemon(index) {
       let data = await fetch(`https://pokeapi.co/api/v2/pokemon/${index}/`);
+      if (data.status === 404) {
+        console.error(
+          `Não foi possível obter o pokemon ${index}, erro ${data.status}`
+        );
+      }
       var pokemonData = await data.json();
 
       let status = await fetch(pokemonData.species.url);
       let pokemonStatus = await status.json();
 
       this.feedArray(pokemonData, pokemonStatus);
-    }
+    },
   },
   async created() {
     await this.getGeneration(150, 151);
@@ -187,7 +197,7 @@ export default {
   justify-content: center;
 }
 
-#searchpoke {
+.searchpoke {
   background: none;
   border: 1px solid black;
   padding: 5px;
@@ -250,6 +260,13 @@ a {
   text-align: center;
   font-family: "Josefin Sans", sans-serif;
   font-size: 18px;
+  cursor: initial;
+}
+
+.pokeId {
+  font-family: "Josefin Sans", sans-serif;
+  top: 15%;
+  position: absolute;
 }
 
 /* STYLES FOR STATUS */
