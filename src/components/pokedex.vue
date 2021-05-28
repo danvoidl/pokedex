@@ -133,6 +133,8 @@ export default {
       }
       var pokemonData = await data.json();
 
+      console.log(pokemonData);
+      
       let status = await fetch(pokemonData.species.url);
       let pokemonStatus = await status.json();
 
